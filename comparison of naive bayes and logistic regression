@@ -1,0 +1,84 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import time
+
+from sklearn.model_selection import train_test_split
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, confusion_matrix, classification_report
+from sklearn.preprocessing import StandardScaler
+
+df = pd.read_csv("ultimate_student_productivity_dataset_5000.csv")
+
+print(df.head())
+print(df.info())
+
+df["Target"] = (df["exam_score"] >= 40).astype(int)
+
+print(df["Target"].value_counts())
+
+X = df.drop(["student_id", "exam_score", "Target"], axis=1)
+y = df["Target"]
+
+X = pd.get_dummies(X, drop_first=True)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+scaler = StandardScaler()
+
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+nb = GaussianNB()
+
+start_nb = time.time()
+nb.fit(X_train, y_train)
+nb_time = time.time() - start_nb
+
+nb_pred = nb.predict(X_test)
+
+nb_accuracy = accuracy_score(y_test, nb_pred)
+
+print("---- Naive Bayes ----")
+print("Accuracy:", nb_accuracy)
+print("Training Time:", nb_time)
+print("Confusion Matrix:\n", confusion_matrix(y_test, nb_pred))
+print("Classification Report:\n", classification_report(y_test, nb_pred))
+
+lr = LogisticRegression(max_iter=1000)
+
+start_lr = time.time()
+lr.fit(X_train, y_train)
+lr_time = time.time() - start_lr
+
+lr_pred = lr.predict(X_test)
+
+lr_accuracy = accuracy_score(y_test, lr_pred)
+
+print("---- Logistic Regression ----")
+print("Accuracy:", lr_accuracy)
+print("Training Time:", lr_time)
+print("Confusion Matrix:\n", confusion_matrix(y_test, lr_pred))
+print("Classification Report:\n", classification_report(y_test, lr_pred))
+
+models = ["Naive Bayes", "Logistic Regression"]
+accuracies = [nb_accuracy, lr_accuracy]
+
+plt.figure()
+plt.bar(models, accuracies)
+plt.title("Accuracy Comparison")
+plt.xlabel("Models")
+plt.ylabel("Accuracy")
+plt.show()
+
+times = [nb_time, lr_time]
+
+plt.figure()
+plt.bar(models, times)
+plt.title("Training Time Comparison")
+plt.xlabel("Models")
+plt.ylabel("Time (seconds)")
+plt.show()
