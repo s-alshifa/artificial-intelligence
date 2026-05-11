@@ -1,0 +1,59 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import LabelEncoder
+from sklearn.linear_model import LinearRegression
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.metrics import mean_squared_error, r2_score
+
+data = pd.read_csv("insurance.csv")
+data.head()
+
+encoder = LabelEncoder()
+data["sex"] = encoder.fit_transform(data["sex"])
+data["smoker"] = encoder.fit_transform(data["smoker"])
+data["region"] = encoder.fit_transform(data["region"])
+
+X = data.drop("charges", axis=1)
+y = data["charges"]
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+lr_model = LinearRegression()
+lr_model.fit(X_train, y_train)
+lr_pred = lr_model.predict(X_test)
+
+dt_model = DecisionTreeRegressor(random_state=42)
+dt_model.fit(X_train, y_train)
+dt_pred = dt_model.predict(X_test)
+
+lr_mse = mean_squared_error(y_test, lr_pred)
+lr_rmse = np.sqrt(lr_mse)
+lr_r2 = r2_score(y_test, lr_pred)
+
+dt_mse = mean_squared_error(y_test, dt_pred)
+dt_rmse = np.sqrt(dt_mse)
+dt_r2 = r2_score(y_test, dt_pred)
+
+print("Model Performance Comparison")
+
+print("\nLinear Regression")
+print("Accuracy :", lr_r2 * 100, "%")
+print("R2 Score :", lr_r2)
+print("MSE :", lr_mse)
+print("RMSE :", lr_rmse)
+
+print("\nDecision Tree Regression")
+print("Accuracy :", dt_r2 * 100, "%")
+print("R2 Score :", dt_r2)
+print("MSE :", dt_mse)
+print("RMSE :", dt_rmse)
+
+plt.bar(["Linear Regression", "Decision Tree"], [lr_r2, dt_r2])
+plt.title("Model Accuracy Comparison (R2 Score)")
+plt.ylabel("R2 Score")
+plt.show()
