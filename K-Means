@@ -1,0 +1,31 @@
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+
+# Step 1: Create dataset
+data = [5, 18, 7, 32, 25, 40, 12, 45, 28, 9]
+
+# Convert to array
+X = np.array(data).reshape(-1,1)
+
+# Step 2: Apply K-Means
+kmeans = KMeans(n_clusters=2, random_state=42)
+kmeans.fit(X)
+
+# Step 3: Get labels
+labels = kmeans.labels_
+
+# Step 4: Get cluster centers
+centers = kmeans.cluster_centers_
+
+print("Dataset:", data)
+print("\nCluster Labels:", labels)
+print("\nCluster Centers:", centers)
+
+# Step 5: Print clusters
+cluster1 = X[labels == 0]
+cluster2 = X[labels == 1]
+
+print("\nCluster 1 Points:", cluster1.flatten())
+print("Cluster 2 Points:", cluster2.flatten())
